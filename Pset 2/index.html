@@ -64,7 +64,12 @@
     // Fill in this function to toggle the display for whose turn
     // The color parameter should be either "black" or "red"
     var toggleTurn = function(color) {
-    // Your code here
+      if (color == "red"){
+        whoseTurn = "black";
+      }
+      else {
+        whoseTurn = "red";
+      }
     }
 
 
@@ -114,6 +119,9 @@
           if (result != null) {
             toggleTurn();
           }
+          console.log(playerColor);
+          console.log(playerDirection);
+          drawCheckerGrid();
         });
 
         board.prepareNewGame();
@@ -141,24 +149,26 @@
     }
   }
 
-function drawCheckers(){ 
+function drawCheckerGrid(){ 
     //loop through all possible squares
     var piecesgrid = document.getElementById('pieces');
-    console.log("in drawCheckers");
+    $("#pieces").empty()
     for (var i = 0; i < BOARD_SIZE; i++) {
         var row = document.createElement("div"); 
-        row.className = "row"; 
+        row.className = "row";
+        row.id = i.toString(); 
         row.setAttribute("style","position:absolute;")
         for (var j = 0; j < BOARD_SIZE; j++) {
             var cell = document.createElement("div"); 
+            cell.id=j.toString();
             cell.setAttribute("style", "position:absolute;")
-            console.log(cell);
             addCheckerImg(cell,i,j);
             row.appendChild(cell); 
        }
        piecesgrid.appendChild(row); 
    }
 }; 
+
 
 function addCheckerImg(cell, row, column){
     var empty = board.isEmptyLocation(row,column);
@@ -190,7 +200,7 @@ function addCheckerImg(cell, row, column){
 </script>
 </head>
 
-<body onload="drawBoardBackground();drawCheckers();">
+<body onload="drawBoardBackground();drawCheckerGrid();">
 
 <table id="mainTable">
     <tr>
