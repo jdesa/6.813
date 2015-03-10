@@ -46,11 +46,13 @@
     var BOARD_SIZE;
     var width = 400;
     var height = 400;
+    var x_inc;
+    var y_inc;
 
     //data model
     var board;
     var rules;
-    var whoseTurn = "black";	
+    var whoseTurn = "black";    
 
     var directionOf = function(color) {
       if (color == "black") {
@@ -62,7 +64,7 @@
     // Fill in this function to toggle the display for whose turn
     // The color parameter should be either "black" or "red"
     var toggleTurn = function(color) {
-	// Your code here
+    // Your code here
     }
 
 
@@ -79,26 +81,26 @@
         console.log("Board size!")
         console.log(BOARD_SIZE)
 
-	rules = new Rules(board);
+    rules = new Rules(board);
 
 
-     	// Your code here
+        // Your code here
 
         board.addEventListener('add',function (e) {
-    		// Your code here
-    	},true);
+            // Your code here
+        },true);
 
-    	board.addEventListener('move',function (e) {
-    		// Your code here
-    	},true);
+        board.addEventListener('move',function (e) {
+            // Your code here
+        },true);
 
         board.addEventListener('remove', function(e) {
-        	// Your code here
+            // Your code here
         }, true);
 
         board.addEventListener('promote',function (e) {
-    		// Your code here
-    	},true);
+            // Your code here
+        },true);
 
         
         $("#btnNewGame").click(function(evt) {
@@ -128,8 +130,8 @@
      var ctx = canvas.getContext('2d');
      ctx.fillStyle="grey"; //setting the color to grey
      var x_shift;
-     var x_inc = width/BOARD_SIZE;
-     var y_inc = height/BOARD_SIZE;
+     x_inc = width/BOARD_SIZE;
+     y_inc = height/BOARD_SIZE;
      for (var i = 0; i < BOARD_SIZE/2; i++) {
        for (var j = 0; j < BOARD_SIZE; j++) {
          var x_shift = j % 2 == 0 ? x_inc : 0;
@@ -138,16 +140,68 @@
      }
     }
   }
+
+function drawCheckers(){ 
+    //loop through all possible squares
+    var e = document.getElementById('pieces');
+    console.log("in drawCheckers");
+    for (var i = 0; i < BOARD_SIZE; i++) {
+        var row = document.createElement("div"); 
+        row.className = "row"; 
+        for (var j = 0; j < BOARD_SIZE; j++) {
+            var cell = document.createElement("div"); 
+            console.log(x_inc);
+            console.log(y_inc);
+            console.log(x_inc*i);
+            console.log(y_inc*j);
+            cell.setAttribute("style", "position:relative;")
+            console.log(cell);
+            addCheckerImg(cell,i,j);
+            console.log("cell is: ");
+            console.log(cell);
+            row.appendChild(cell); 
+       }
+       e.appendChild(row); 
+   }
+}; 
+
+function addCheckerImg(cell, row, column){
+    var empty = board.isEmptyLocation(row,column);
+    if (empty == false) {
+        var checker = board.getCheckerAt(row,column);
+        var imgpath;
+        if (checker.color == "red") {
+            if (checker.king){
+                imgpath = 'graphics/red-king.png';
+            }
+            else {
+                imgpath = 'graphics/red-piece.png';
+            }
+        }
+        else {
+            if (checker.king){
+                imgpath = 'graphics/black-king.png'
+            }
+            else{
+                imgpath = 'graphics/black-piece.png'
+            }
+        }
+        var img = document.createElement('img');
+        img.src = imgpath;
+        img.setAttribute("style", "width:"+x_inc+"px; height:"+y_inc+"px;position:absolute;left:"+x_inc*column+"px;top:"+y_inc*row+"px;")
+        cell.appendChild(img);
+    }
+};
 </script>
 </head>
 
-<body onload="drawBoardBackground();">
+<body onload="drawBoardBackground();drawCheckers();">
 
 <table id="mainTable">
     <tr>
         <td id="navigation">
           <table>
-			  <tr><td>		<!-- Your code here -->			</td></tr>
+              <tr><td>      <!-- Your code here -->         </td></tr>
               <tr><td><input id="btnNewGame" type="button" name="new" value="New Game"/></td></tr>
               <tr><td><input id="btnAutoMove" type="button" name="new" value="Auto Move"/></td></tr>
 
@@ -155,9 +209,10 @@
         </td>
 
         <td id="content">
-            <div style="width:400px; height:400px;">
-		  <canvas id="canvas" width="400" height="400">
+            <div id="boardwrapper" style="width:400px; height:400px;">
+          <canvas id="canvas" width="400" height="400">
           </canvas>
+          <div id="pieces" style="positon:absolute;z-index:-1;">
             </div>
         </td>
     </tr>
