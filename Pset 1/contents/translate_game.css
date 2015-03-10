@@ -1,0 +1,45 @@
+html {
+    background-color: #eee;
+}
+
+
+/* Your CSS here */
+body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size:20px;
+}
+
+.h1{
+	font-size:40px;
+}
+
+.row{
+	padding: 10px;
+}
+
+.table-header{
+	color:gray;
+	font-size:30px;
+}
+.black{
+	color:black;
+}
+.grey{
+	color:gray;
+}
+
+.blue{
+	color:blue;
+}
+
+.red{
+	color:red;
+}
+
+td{
+	padding:10px;
+}
+
+.strikethrough{
+	text-decoration:line-through;
+}

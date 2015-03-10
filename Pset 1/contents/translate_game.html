@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+   6.813 PSET 1: Jacqui De Sa
+   COLLABORATORS: CK Ong & Miles Kelsey
+   ONLINE RESOURCES: 
+  
+    Adding to a Table with JQuery:
+    http://mrbool.com/how-to-add-edit-and-delete-rows-of-a-html-table-with-jquery/26721
+
+    Overriding Autocomplete:
+    http://xylil.com/2012/03/08/overriding-jquery-ui-autocomplete-methods/
+   
+  -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Ready, Set, Translate !</title>
+    <link type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.10.0.custom.css" rel="stylesheet" />
+    <link type="text/css" href="translate_game.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="jquery/js/jquery-1.9.0.min.js"></script>
+    <script type="text/javascript" src="jquery/js/jquery-ui-1.10.0.custom.min.js"></script>
+    <script type="text/javascript" src="dicts.json"></script>
+    <script type="text/javascript" src="translate_game.js"></script>
+
+  </head>
+  <body>
+    <h1 class = "row grey"> Translate from <span class = "black" id = "lang_from"> </span> to <span class = "black" id = "lang_to"></span> </h1>
+    <table>
+      <tr class = "row table-header">
+        <td>Spanish</td>
+        <td>English</td>
+        <td>Answer</td>
+      </tr>
+      <tr class = "row">
+        <td id ="randomword"></td>
+        <td>
+          <input id="inputbox" style="max-width:90px">
+        </td>
+        <td>
+          <button id="answerbutton"> See Answer </button>
+        </td>
+      </tr>
+      <tbody id="start">
+      <tr class = "userinput">
+
+      </tr>
+      <tr class = "row blue">
+        <td>calabaza</td>
+        <td>pumpkin</td>
+        <td>
+          <span class="ui-icon ui-icon-check"></span>
+        </td>
+      </tr>
+      <tr class = "row red">
+        <td>postmondernidad</td>
+        <td><span class="strikethrough">phone</span></td>
+        <td>postmodernism</td>
+      </tr>
+    </tbody>
+    </table>
+  </body>
+</html>
