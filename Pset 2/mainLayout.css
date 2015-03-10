@@ -19,3 +19,20 @@
 	height: 400px;
 	background: white;
 }
+
+#whoseturn{
+	text-align:center;
+}
+
+#turninfo{
+	text-align:center;
+	font-family: fantasy;
+}
+
+.red{
+	color:red;
+}
+
+.black{
+	color:black;
+}

@@ -54,6 +54,7 @@
     var rules;
     var whoseTurn = "black";    
 
+
     var directionOf = function(color) {
       if (color == "black") {
         return -1;
@@ -64,11 +65,15 @@
     // Fill in this function to toggle the display for whose turn
     // The color parameter should be either "black" or "red"
     var toggleTurn = function(color) {
-      if (color == "red"){
+      if (whoseTurn == "red"){
         whoseTurn = "black";
+        $('#whoseTurn').text(whoseTurn);
+        document.getElementById('turninfo').className = "black";
       }
       else {
         whoseTurn = "red";
+        $('#whoseTurn').text(whoseTurn);
+        document.getElementById('turninfo').className = "red";
       }
     }
 
@@ -77,6 +82,9 @@
     // This allows the Javascript code inside this block to only run when the page
     // has finished loading in the browser.
     $(document).ready(function() {
+        
+        $('#whoseTurn').text(whoseTurn);
+        
         if ($.getUrlVar('size') && $.getUrlVar('size') >= 6) {
             BOARD_SIZE = $.getUrlVar('size');
         } else {
@@ -207,6 +215,11 @@ function addCheckerImg(cell, row, column){
         <td id="navigation">
           <table>
               <tr><td>      <!-- Your code here -->         </td></tr>
+              <tr><td>
+                <div id = "turninfo"> 
+                  <p><span id="whoseTurn"/> </span> to play</p>
+                </div>
+               </td></tr>
               <tr><td><input id="btnNewGame" type="button" name="new" value="New Game"/></td></tr>
               <tr><td><input id="btnAutoMove" type="button" name="new" value="Auto Move"/></td></tr>
 
