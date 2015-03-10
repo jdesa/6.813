@@ -126,6 +126,7 @@
  var canvas = document.getElementById('canvas');
    if (canvas.getContext) {
      var ctx = canvas.getContext('2d');
+     ctx.fillStyle="grey"; //setting the color to grey
      var x_shift;
      var x_inc = width/BOARD_SIZE;
      var y_inc = height/BOARD_SIZE;
