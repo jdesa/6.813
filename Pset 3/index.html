@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<!--
+  COLLABORATORS: I discussed this assignment with CK Ong and Miles Kelsey.
+
+  References: http://www.html5canvastutorials.com/tutorials/html5-canvas-lines
+  http://www.webtutorialplus.com/html5-canvas-shapes
+  
+-->
+<html>
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Checkerboard</title>
+
+<!-- Load style sheets -->
+<link rel="stylesheet" type="text/css" href="mainLayout.css" />
+
+<!-- Load any supplemental Javascript libraries here -->
+<script type="text/javascript" src="external_js/jquery-1.9.0.min.js"></script>
+<script type="text/javascript" src="checker.js"></script>
+<script type="text/javascript" src="boardEvent.js"></script>
+<script type="text/javascript" src="board.js"></script>
+<script type="text/javascript" src="rules.js"></script>
+
+<script type="application/javascript">
+
+//This script extracts parameters from the URL
+//from jquery-howto.blogspot.com
+
+    $.extend({
+        getUrlVars : function() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(
+                    window.location.href.indexOf('?') + 1).split('&');
+            for ( var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        },
+        getUrlVar : function(name) {
+            return $.getUrlVars()[name];
+        }
+    });
+
+
+    var DEFAULT_BOARD_SIZE = 8;
+    var BOARD_SIZE;
+    var width = 400; //width of the board
+    var height = 400; //height of the board
+    var x_inc; //x size of a checkerboard side
+    var y_inc; //y size of a checkerboard side
+
+    //data model
+    var board;
+    var rules;
+    var whoseTurn = "black";    
+
+
+    var directionOf = function(color) {
+      if (color == "black") {
+        return -1;
+      }
+      return 1;
+    }
+
+    // Fill in this function to toggle the display for whose turn
+    // The color parameter should be either "black" or "red"
+    var toggleTurn = function(color) {
+      if (whoseTurn == "red"){
+        whoseTurn = "black";
+        //indicate whose turn it is:
+        $('#whoseTurn').text(whoseTurn);
+        document.getElementById('turninfo').className = "black";
+      }
+      else {
+        whoseTurn = "red";
+        $('#whoseTurn').text(whoseTurn);
+        document.getElementById('turninfo').className = "red";
+      }
+    }
+
+     //Reference: http://www.html5canvastutorials.com/tutorials/html5-canvas-lines/
+    function drawArrow(from_row,from_col,to_row,to_col){
+       var arrowcanvas = document.getElementById('arrowcanvas');
+       var context = arrowcanvas.getContext('2d');
+       context.clearRect ( 0 , 0 , arrowcanvas.width, arrowcanvas.height );
+       context.beginPath();
+       var linewidth = 3;
+       var x_from = from_col*x_inc + x_inc/2;
+       var x_to = to_col*x_inc + x_inc/2;
+       var y_from = from_row*y_inc + y_inc/2;
+       var y_to = to_row*y_inc + y_inc/2;
+       //Start at original square
+       context.moveTo(x_from, y_from);
+       //Draw arrow body to new square
+       context.lineTo(x_to, y_to);
+       //Move to arrow point (new square)
+       context.moveTo(x_to,y_to);
+       //Draw arrow head
+       
+       //Direction of the arrow in the x and y axes
+       var xarrowdir = Math.sign(from_row - to_row);
+       var yarrowdir = Math.sign(from_col - to_col);
+
+       context.lineTo(x_to + x_inc/2*yarrowdir, y_to);
+       context.moveTo(x_to,y_to);
+       context.lineTo(x_to,y_to + y_inc/2*xarrowdir);
+
+       context.strokeStyle = 'yellow';
+       context.lineWidth = linewidth;
+       context.stroke();
+    }
+
+
+    // This allows the Javascript code inside this block to only run when the page
+    // has finished loading in the browser.
+    $(document).ready(function() {
+        
+        $('#whoseTurn').text(whoseTurn);
+        
+        if ($.getUrlVar('size') && $.getUrlVar('size') >= 6) {
+            BOARD_SIZE = $.getUrlVar('size');
+        } else {
+            BOARD_SIZE = DEFAULT_BOARD_SIZE;
+        }
+        board = new Board(BOARD_SIZE);
+        x_inc = width/BOARD_SIZE;
+        y_inc = height/BOARD_SIZE;
+
+    rules = new Rules(board);
+        
+        $("#btnNewGame").click(function(evt) {
+            board.prepareNewGame();
+            drawCheckerGrid();
+            var arrowcanvas = document.getElementById('arrowcanvas');
+            var context = arrowcanvas.getContext('2d');
+            context.clearRect ( 0 , 0 , arrowcanvas.width, arrowcanvas.height );
+
+        });
+
+        $("#btnAutoMove").click(function(evt) {
+          var playerColor = whoseTurn;
+          var playerDirection = directionOf(playerColor);
+          console.log("PlayerDirection: " + playerDirection.toString());
+          var result = rules.makeRandomMove(playerColor, playerDirection);
+          console.log("result: ");
+          console.log(result);
+          drawArrow(result.from_row,result.from_col,result.to_row,result.to_col);
+          if (result != null) {
+            toggleTurn();
+          }
+          console.log(playerColor);
+          console.log(playerDirection);
+          drawCheckerGrid();
+        });
+
+        board.prepareNewGame();
+
+    });
+
+ //Source: http://www.webtutorialplus.com/html5-canvas-shapes/
+ function drawBoardBackground() {
+ var canvas = document.getElementById('canvas');
+   if (canvas.getContext) {
+     var ctx = canvas.getContext('2d');
+     ctx.fillStyle="grey"; //setting the color to grey
+     var x_shift;
+     for (var i = 0; i < BOARD_SIZE/2; i++) {
+       for (var j = 0; j < BOARD_SIZE; j++) {
+         var x_shift = j % 2 == 0 ? x_inc : 0;
+         ctx.fillRect(i * 2*x_inc+ x_shift, j * y_inc, x_inc, y_inc);
+       }
+     }
+    }
+  }
+
+ //Draw the parent divs for the checker images
+function drawCheckerGrid(){ 
+    //loop through all possible squares
+    var piecesgrid = document.getElementById('pieces');
+    $("#pieces").empty()
+    for (var i = 0; i < BOARD_SIZE; i++) {
+        var row = document.createElement("div"); 
+        row.className = "row";
+        row.id = i.toString(); 
+        row.setAttribute("style","position:absolute;")
+        for (var j = 0; j < BOARD_SIZE; j++) {
+            var cell = document.createElement("div"); 
+            cell.id=j.toString();
+            cell.className = "checker";
+            cell.setAttribute("style", "position:absolute;")
+            addCheckerImg(cell,i,j);
+            row.appendChild(cell); 
+       }
+       piecesgrid.appendChild(row); 
+   }
+
+   
+    var checker = $('.checker');
+
+    var drag = {
+        elem: null,
+        x: 0,
+        y: 0,
+        state: false
+    };
+    var delta = {
+        x: 0,
+        y: 0
+    };
+
+    checker.mousedown(function(e) {
+        if (!drag.state) {
+            drag.elem = this;
+            drag.x = e.pageX;
+            drag.y = e.pageY;
+            drag.state = true;
+        }
+        return false;
+    });
+
+
+    $(document).mousemove(function(e) {
+        if (drag.state) {
+
+            delta.x = e.pageX - drag.x;
+            delta.y = e.pageY - drag.y;
+
+            var cur_offset = $(drag.elem).offset();
+
+            console.log("delta.x is: " + delta.x);
+            console.log("delta.y is: " + delta.y);
+            console.log("cur_offset.left: " + cur_offset.left);
+            console.log("cur_offset.top: " + cur_offset.top);
+
+            $(drag.elem).offset({
+                left: (cur_offset.left + delta.x),
+                top: (cur_offset.top + delta.y)
+            });
+
+            drag.x = e.pageX;
+            drag.y = e.pageY;
+        }
+    });
+
+    $(document).mouseup(function() {
+        if (drag.state) {
+            drag.state = false;
+        }
+    });
+
+
+}; 
+
+
+
+//Add the correct checker image to a given cell.
+function addCheckerImg(cell, row, column){
+    var empty = board.isEmptyLocation(row,column);
+    if (empty == false) {
+        var checker = board.getCheckerAt(row,column);
+        var imgpath;
+        if (checker.color == "red") {
+            if (checker.king){
+                imgpath = 'graphics/red-king.png';
+            }
+            else {
+                imgpath = 'graphics/red-piece.png';
+            }
+        }
+        else {
+            if (checker.king){
+                imgpath = 'graphics/black-king.png';
+            }
+            else{
+                imgpath = 'graphics/black-piece.png';
+            }
+        }
+        var img = document.createElement('img');
+        img.src = imgpath;
+        cell.setAttribute("style", "background:url("+imgpath+") no-repeat center center;width:"+x_inc+"px; height:"+y_inc+"px;position:absolute;left:"+x_inc*column+"px;top:"+y_inc*row+"px;");
+        //cell.appendChild(img);
+    }
+};
+
+</script>
+</head>
+
+<body onload="drawBoardBackground();drawCheckerGrid();">
+
+<table id="mainTable">
+    <tr>
+        <td id="navigation">
+          <table>
+              <tr><td>      <!-- Your code here -->         </td></tr>
+              <tr><td>
+                <div id = "turninfo"> 
+                  <p><span id="whoseTurn"/> </span> to play</p>
+                </div>
+               </td></tr>
+              <tr><td><input id="btnNewGame" type="button" name="new" value="New Game"/></td></tr>
+              <tr><td><input id="btnAutoMove" type="button" name="new" value="Auto Move"/></td></tr>
+
+            </table>
+        </td>
+
+        <td id="content">
+            <div id="boardwrapper" style="width:400px;height:400px;">
+          <canvas id="canvas" width="400" height="400" style="position:absolute;pointer-events:none;">
+          </canvas>         
+          <div id="pieces" style="positon:relative;">
+            </div>
+          <canvas id="arrowcanvas" width="400" height="400" style="position:absolute;pointer-events:none">
+          </canvas> 
+          </div>
+        </td>
+    </tr>
+
+   </table>
+
+</body>
+
+</html>

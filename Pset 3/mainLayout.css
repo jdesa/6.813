@@ -1,0 +1,38 @@
+﻿#navigation{
+	width:140px
+}
+
+#navigation table{
+	width:100%
+}
+
+#navigation input{
+	width:100%
+}
+
+#content{
+	background-color:gray;
+}
+
+#canvas{
+	width: 400px;
+	height: 400px;
+	background: white;
+}
+
+#whoseturn{
+	text-align:center;
+}
+
+#turninfo{
+	text-align:center;
+	font-family: fantasy;
+}
+
+.red{
+	color:red;
+}
+
+.black{
+	color:black;
+}
