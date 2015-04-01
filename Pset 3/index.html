@@ -282,20 +282,44 @@ function drawCheckerGrid(){
     });
 }; 
 
+function getDirFromColor(color){
+    if (color == "black"){
+    return -1;
+  }
+  else if (color == "red"){
+    return 1;
+  }
+  else {
+    console.log("Invalid Checkercolor.");
+    return 0;
+  }
+
+}
+
+
 function movetoSquare(row, col, orig_row, orig_col){    
   var checker = board.getCheckerAt(orig_row,orig_col);
   console.log("checker: " + checker);
   var isEmptyLocation = board.isEmptyLocation(row, col);
   console.log("isEmptyLocation: " + isEmptyLocation);
-  if (isEmptyLocation == false){
+  
+  var valid_move = rules.makeMove(checker, getDirFromColor(whoseTurn), getDirFromColor(checker.color), row, col);
+
+  console.log("Valid move? " + valid_move);
+
+  if (isEmptyLocation == false || valid_move == null){
     row = orig_row; 
     col = orig_col;
+  }
+  else{
+    drawArrow(orig_row,orig_col,row,col);
+    toggleTurn();
   }
   console.log("checker row: " + checker.row);
   
   board.moveTo(checker, row, col);
   drawCheckerGrid();
-  drawArrow(orig_row,orig_col,row,col);
+  
 }
 
 function calcSquareFromPos(pos){
