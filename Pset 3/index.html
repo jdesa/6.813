@@ -349,7 +349,10 @@ function addCheckerImg(cell, row, column){
         }
         var img = document.createElement('img');
         img.src = imgpath;
-        cell.setAttribute("style", "background:url("+imgpath+") no-repeat center center;width:"+x_inc+"px; height:"+y_inc+"px;position:absolute;left:"+x_inc*column+"px;top:"+y_inc*row+"px;");
+        img.setAttribute("style", "width:"+x_inc+"px; height:"+y_inc+"px;position:absolute;left:"+x_inc*column+"px;top:"+y_inc*row+"px;")
+        cell.appendChild(img);
+
+        //cell.setAttribute("style", "background:url("+imgpath+") no-repeat center center;width:"+x_inc+"px; height:"+y_inc+"px;position:absolute;left:"+x_inc*column+"px;top:"+y_inc*row+"px;");
         //cell.appendChild(img);
     }
 };
