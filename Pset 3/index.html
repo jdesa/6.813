@@ -56,8 +56,9 @@
     //data model
     var board;
     var rules;
-    var whoseTurn = "black";    
-
+    var whoseTurn = "black"; 
+    var moves_stack = [];
+    var undid_moves_stack = [];  
 
     var directionOf = function(color) {
       if (color == "black") {
@@ -138,7 +139,8 @@
             var arrowcanvas = document.getElementById('arrowcanvas');
             var context = arrowcanvas.getContext('2d');
             context.clearRect ( 0 , 0 , arrowcanvas.width, arrowcanvas.height );
-
+            whoseTurn = "red";
+            toggleTurn();
         });
 
         $("#btnAutoMove").click(
@@ -265,9 +267,6 @@ function drawCheckerGrid(){
             drag.y = e.pageY;
         }
     });
-
-    //TODO: Make checker always on top while being dragged.
-
     checker.mouseup(function() {
         if (drag.state) {
             checker.css("z-index", 2);
@@ -293,33 +292,30 @@ function getDirFromColor(color){
     console.log("Invalid Checkercolor.");
     return 0;
   }
-
 }
-
 
 function movetoSquare(row, col, orig_row, orig_col){    
   var checker = board.getCheckerAt(orig_row,orig_col);
-  console.log("checker: " + checker);
+  //console.log("checker: " + checker);
   var isEmptyLocation = board.isEmptyLocation(row, col);
-  console.log("isEmptyLocation: " + isEmptyLocation);
+  //console.log("isEmptyLocation: " + isEmptyLocation);
   
-  var valid_move = rules.makeMove(checker, getDirFromColor(whoseTurn), getDirFromColor(checker.color), row, col);
+  var ramifications = rules.makeMove(checker, getDirFromColor(whoseTurn), getDirFromColor(checker.color), row, col);
 
-  console.log("Valid move? " + valid_move);
+  //console.log("Valid move? " + ramifications);
 
-  if (isEmptyLocation == false || valid_move == null){
+  if (isEmptyLocation == false || ramifications == null){
     row = orig_row; 
     col = orig_col;
   }
   else{
     drawArrow(orig_row,orig_col,row,col);
     toggleTurn();
+    moves_stack.push(ramifications);
   }
-  console.log("checker row: " + checker.row);
-  
+  //console.log("checker row: " + checker.row);
   board.moveTo(checker, row, col);
   drawCheckerGrid();
-  
 }
 
 function calcSquareFromPos(pos){
@@ -334,8 +330,9 @@ function addCheckerImg(cell, row, column){
     if (empty == false) {
         var checker = board.getCheckerAt(row,column);
         var imgpath;
+        console.log(checker.isKing);
         if (checker.color == "red") {
-            if (checker.king){
+            if (checker.isKing){
                 imgpath = 'graphics/red-king.png';
             }
             else {
@@ -343,7 +340,7 @@ function addCheckerImg(cell, row, column){
             }
         }
         else {
-            if (checker.king){
+            if (checker.isKing){
                 imgpath = 'graphics/black-king.png';
             }
             else{
@@ -374,7 +371,8 @@ function addCheckerImg(cell, row, column){
                </td></tr>
               <tr><td><input id="btnNewGame" type="button" name="new" value="New Game"/></td></tr>
               <tr><td><input id="btnAutoMove" type="button" name="new" value="Auto Move"/></td></tr>
-
+              <tr><td><input id="btnUndo" type="button" name="new" value="Undo"/></td></tr>
+              <tr><td><input id="btnRedo" type="button" name="new" value="Redo"/></td></tr>
             </table>
         </td>
 
