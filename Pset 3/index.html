@@ -224,14 +224,21 @@ function drawCheckerGrid(){
             drag.elem = this;
             drag.x = e.pageX;
             drag.y = e.pageY;
-            drag.state = true;
 
             var cur_offset = $(drag.elem).offset();
             orig_pos.x = cur_offset.left - 150;
             orig_pos.y = cur_offset.top;
 
-            console.log("orig_pos x: " + orig_pos.x);
-            console.log("orig_pos y: " + orig_pos.y);
+            var orig_col = calcSquareFromPos(orig_pos.x);
+            var orig_row = calcSquareFromPos(orig_pos.y);
+            var checker = board.getCheckerAt(orig_row,orig_col);
+
+            if (checker.color != whoseTurn){
+              drag.state = false;
+            }
+            else{
+               drag.state = true;
+            }
         }
         return false;
     });
@@ -239,7 +246,6 @@ function drawCheckerGrid(){
 
     $(document).mousemove(function(e) {
         if (drag.state) {
-
             delta.x = e.pageX - drag.x;
             delta.y = e.pageY - drag.y;
 
