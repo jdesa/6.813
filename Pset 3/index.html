@@ -220,7 +220,6 @@ function drawCheckerGrid(){
     }
 
     checker.mousedown(function(e) {
-        console.log("pos: " +  this.id);
         if (!drag.state) {
             drag.elem = this;
             drag.x = e.pageX;
@@ -251,6 +250,8 @@ function drawCheckerGrid(){
                 top: (cur_offset.top + delta.y)
             });
 
+            $(drag.elem).css("z-index", 4);
+
             //Finding relative position
             pos.x = cur_offset.left + delta.x - 150;
             pos.y = cur_offset.top + delta.y;
@@ -263,17 +264,13 @@ function drawCheckerGrid(){
 
     checker.mouseup(function() {
         if (drag.state) {
+            checker.css("z-index", 2);
             drag.state = false;
             var scalingfactor = 400/BOARD_SIZE; 
             var col = calcSquareFromPos(pos.x);
             var row = calcSquareFromPos(pos.y);
-            console.log("col: " + col);
-            console.log("row: " + row);
-            console.log("this: " + this);
             var orig_col = calcSquareFromPos(orig_pos.x);
             var orig_row = calcSquareFromPos(orig_pos.y);
-            console.log("original row: " + orig_row);
-            console.log("original col: " + orig_col);
             movetoSquare(row, col, orig_row, orig_col);
         }
     });
