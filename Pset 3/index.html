@@ -220,13 +220,19 @@ function drawCheckerGrid(){
     }
 
     checker.mousedown(function(e) {
+        console.log("pos: " +  this.id);
         if (!drag.state) {
             drag.elem = this;
             drag.x = e.pageX;
             drag.y = e.pageY;
             drag.state = true;
-            orig_pos.x = drag.x - 150;
-            orig_pos.y = drag.y;
+
+            var cur_offset = $(drag.elem).offset();
+            orig_pos.x = cur_offset.left - 150;
+            orig_pos.y = cur_offset.top;
+
+            console.log("orig_pos x: " + orig_pos.x);
+            console.log("orig_pos y: " + orig_pos.y);
         }
         return false;
     });
@@ -264,8 +270,8 @@ function drawCheckerGrid(){
             console.log("col: " + col);
             console.log("row: " + row);
             console.log("this: " + this);
-            var orig_col = calcSquareFromPos(orig_pos.x) -1;
-            var orig_row = calcSquareFromPos(orig_pos.y) -1;
+            var orig_col = calcSquareFromPos(orig_pos.x);
+            var orig_row = calcSquareFromPos(orig_pos.y);
             console.log("original row: " + orig_row);
             console.log("original col: " + orig_col);
             movetoSquare(row, col, orig_row, orig_col);
@@ -286,6 +292,7 @@ function movetoSquare(row, col, orig_row, orig_col){
   
   board.moveTo(checker, row, col);
   drawCheckerGrid();
+  drawArrow(orig_row,orig_col,row,col);
 }
 
 function calcSquareFromPos(pos){
