@@ -141,19 +141,16 @@
 
         });
 
-        $("#btnAutoMove").click(function(evt) {
+        $("#btnAutoMove").click(
+
+          function(evt) {
           var playerColor = whoseTurn;
           var playerDirection = directionOf(playerColor);
-          console.log("PlayerDirection: " + playerDirection.toString());
           var result = rules.makeRandomMove(playerColor, playerDirection);
-          console.log("result: ");
-          console.log(result);
           drawArrow(result.from_row,result.from_col,result.to_row,result.to_col);
           if (result != null) {
             toggleTurn();
           }
-          console.log(playerColor);
-          console.log(playerDirection);
           drawCheckerGrid();
         });
 
@@ -198,7 +195,7 @@ function drawCheckerGrid(){
        piecesgrid.appendChild(row); 
    }
 
-   
+
     var checker = $('.checker');
 
     var drag = {
@@ -212,12 +209,24 @@ function drawCheckerGrid(){
         y: 0
     };
 
+    var pos = {
+      x: 0,
+      y: 0
+    }
+
+    var orig_pos= {
+      x: 0,
+      y: 0
+    }
+
     checker.mousedown(function(e) {
         if (!drag.state) {
             drag.elem = this;
             drag.x = e.pageX;
             drag.y = e.pageY;
             drag.state = true;
+            orig_pos.x = drag.x - 150;
+            orig_pos.y = drag.y;
         }
         return false;
     });
@@ -231,31 +240,59 @@ function drawCheckerGrid(){
 
             var cur_offset = $(drag.elem).offset();
 
-            console.log("delta.x is: " + delta.x);
-            console.log("delta.y is: " + delta.y);
-            console.log("cur_offset.left: " + cur_offset.left);
-            console.log("cur_offset.top: " + cur_offset.top);
-
             $(drag.elem).offset({
                 left: (cur_offset.left + delta.x),
                 top: (cur_offset.top + delta.y)
             });
 
+            //Finding relative position
+            pos.x = cur_offset.left + delta.x - 150;
+            pos.y = cur_offset.top + delta.y;
             drag.x = e.pageX;
             drag.y = e.pageY;
         }
     });
 
-    $(document).mouseup(function() {
+    //TODO: Make checker always on top while being dragged.
+
+    checker.mouseup(function() {
         if (drag.state) {
             drag.state = false;
+            var scalingfactor = 400/BOARD_SIZE; 
+            var col = calcSquareFromPos(pos.x);
+            var row = calcSquareFromPos(pos.y);
+            console.log("col: " + col);
+            console.log("row: " + row);
+            console.log("this: " + this);
+            var orig_col = calcSquareFromPos(orig_pos.x) -1;
+            var orig_row = calcSquareFromPos(orig_pos.y) -1;
+            console.log("original row: " + orig_row);
+            console.log("original col: " + orig_col);
+            movetoSquare(row, col, orig_row, orig_col);
         }
     });
-
-
 }; 
 
+function movetoSquare(row, col, orig_row, orig_col){    
+  var checker = board.getCheckerAt(orig_row,orig_col);
+  console.log("checker: " + checker);
+  var isEmptyLocation = board.isEmptyLocation(row, col);
+  console.log("isEmptyLocation: " + isEmptyLocation);
+  if (isEmptyLocation == false){
+    row = orig_row; 
+    col = orig_col;
+  }
+  console.log("checker row: " + checker.row);
+  
+  board.moveTo(checker, row, col);
+  drawCheckerGrid();
+}
 
+function calcSquareFromPos(pos){
+  var scalingfactor = 400/BOARD_SIZE; 
+  var square = Math.floor((pos + scalingfactor/2)/scalingfactor);
+  return square;
+}
 
 //Add the correct checker image to a given cell.
 function addCheckerImg(cell, row, column){
