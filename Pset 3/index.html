@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 
 <!--
-  COLLABORATORS: I discussed this assignment with CK Ong and Miles Kelsey.
+  COLLABORATORS: I discussed this assignment with CK Ong, Sherry Ren, and Miles Kelsey.
 
   References: http://www.html5canvastutorials.com/tutorials/html5-canvas-lines
   http://www.webtutorialplus.com/html5-canvas-shapes
+
+  Pset 3 Portion References:
+  For Drag-and-Drop: http://stackoverflow.com/questions/5758090/dragging-a-div-in-jquery-fine-when-mouse-is-slow-but-fails-on-fast-mouse-move leading to http://jsfiddle.net/Jjgmz/1/
   
 -->
 <html>
@@ -81,21 +84,26 @@
         $('#whoseTurn').text(whoseTurn);
         document.getElementById('turninfo').className = "red";
       }
-      refreshUndoRedo();
+      setUndoButtonStatus();
+      setRedoButtonStatus();
+
     }
 
-    function refreshUndoRedo(){
-
-      undo_disabled = moves_stack.length == 0 ? true : false;
-      console.log(redo_moves_stack);
-      redo_disabled = redo_moves_stack.length == 0 ? true : false;
-      
-      console.log("undo_disabled? " + undo_disabled);
-      console.log("redo_disabled? " + redo_disabled);
-      
-      document.getElementById("btnUndo").disabled = undo_disabled;
-      document.getElementById("btnRedo").disabled = redo_disabled;
+    function setUndoButtonStatus(){
+      undo_status = (moves_stack.length == 0) ? true : false;
+      document.getElementById("btnUndo").disabled = undo_status;
     }
+
+    function setRedoButtonStatus(){
+      var redo_queue_status = (redo_moves_stack.length == 0) ? true : false;
+      var cur_redo_status = document.getElementById("btnRedo").disabled;
+      if (cur_redo_status == false){
+        console.log("in case");
+        document.getElementById("btnRedo").disabled = redo_queue_status;
+      }
+    }
+      
+
 
      //Reference: http://www.html5canvastutorials.com/tutorials/html5-canvas-lines/
     function drawArrow(from_row,from_col,to_row,to_col){
@@ -154,9 +162,11 @@
             var context = arrowcanvas.getContext('2d');
             context.clearRect ( 0 , 0 , arrowcanvas.width, arrowcanvas.height );
             whoseTurn = "red";
-            toggleTurn();
+            moves_stack = [];
+            redo_moves_stack = [];
             document.getElementById("btnUndo").disabled = true;
             document.getElementById("btnRedo").disabled = true;
+            toggleTurn();
         });
 
         $("#btnAutoMove").click(
@@ -171,6 +181,11 @@
             toggleTurn();
           }
           drawCheckerGrid();
+
+          //disable Redo Button 
+          document.getElementById("btnUndo").disabled = false;
+          document.getElementById("btnRedo").disabled = true;
+
         });
 
         $("#btnUndo").click(function(evt) {
@@ -210,6 +225,7 @@
                   console.log("pushed to redo moves stack");
                   console.log(redo_moves_stack);
                   toggleTurn();
+                  document.getElementById("btnRedo").disabled = false;
                 }
               }
           });
@@ -221,11 +237,22 @@
               redo_move = redo_moves_stack.pop();
               console.log("redo_moves_stack: " + redo_moves_stack.toString());
             //console.log("redo_move " + redo_move);
+              
+
               if (redo_move == undefined) {
                 var x = 5;
                 //document.getElementById("btnUndo").disabled = true;
               }
               else{
+
+                for (var i=0; i<redo_move['remove'].length; i++) {
+                    board.remove(
+                      board.getCheckerAt(
+                        redo_move['remove'][i]['row'],
+                        redo_move['remove'][i]['col']
+                      )
+                    );
+                }
                 
                 //console.log("redo_move row: " + redo_move.to_row + " redo_move to col: " + redo_move.to_col);
 
@@ -239,6 +266,7 @@
                   drawCheckerGrid();
                   //console.log(checker);
                   drawArrow(redo_move.from_row,redo_move.from_col, redo_move.to_row,redo_move.to_col);
+                  moves_stack.push(redo_move);
                   toggleTurn();
                 }
               }
@@ -284,7 +312,7 @@ function drawCheckerGrid(){
         for (var j = 0; j < BOARD_SIZE; j++) {
             var cell = document.createElement("div"); 
             cell.id=j.toString();
-            cell.setAttribute("style", "position:absolute;")
+            cell.setAttribute("style", "position:absolute;margin:auto;top:0;left:0;right:0;bottom:0;")
             addCheckerImg(cell,i,j);
             row.appendChild(cell); 
        }
@@ -321,12 +349,17 @@ function drawCheckerGrid(){
             drag.x = e.pageX;
             drag.y = e.pageY;
 
+            console.log(e.id);
+
             var cur_offset = $(drag.elem).offset();
             orig_pos.x = cur_offset.left - 150;
             orig_pos.y = cur_offset.top;
 
             var orig_col = calcSquareFromPos(orig_pos.x);
             var orig_row = calcSquareFromPos(orig_pos.y);
+
+            console.log("orig row: " + orig_row + " orig_col " + orig_col);
+            
             var checker = board.getCheckerAt(orig_row,orig_col);
 
             if (checker.color != whoseTurn){
@@ -411,6 +444,7 @@ function movetoSquare(row, col, orig_row, orig_col){
   ////console.log("checker row: " + checker.row);
   board.moveTo(checker, row, col);
   redo_moves_stack = [];
+  document.getElementById("btnRedo").disabled = true;
   drawCheckerGrid();
 }
 
