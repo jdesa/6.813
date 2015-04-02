@@ -58,7 +58,7 @@
     var rules;
     var whoseTurn = "black"; 
     var moves_stack = [];
-    var undid_moves_stack = [];  
+    var redo_moves_stack = [];  
 
     var directionOf = function(color) {
       if (color == "black") {
@@ -149,6 +149,7 @@
           var playerColor = whoseTurn;
           var playerDirection = directionOf(playerColor);
           var result = rules.makeRandomMove(playerColor, playerDirection);
+          moves_stack.push(result);
           drawArrow(result.from_row,result.from_col,result.to_row,result.to_col);
           if (result != null) {
             toggleTurn();
@@ -156,9 +157,66 @@
           drawCheckerGrid();
         });
 
-        board.prepareNewGame();
+        $("#btnUndo").click(function(evt) {
+              undid_move = moves_stack.pop();
+              console.log(undid_move);
+              if (undid_move == undefined) {
+                var x = 5;
+                //document.getElementById("btnUndo").disabled = true;
+              }
+              else{
+                console.log("Undid_move: " + undid_move);
+                var checker = board.getCheckerAt(undid_move.to_row, undid_move.to_col);
+                if (checker == undefined){
+                  console.log("Checker was undefined, what's with that?");
+                }
+                else {
+                  board.moveTo(checker, undid_move.from_row, undid_move.from_col);
+                  drawCheckerGrid();
+                  console.log(checker);
 
+                  drawArrow(undid_move.to_row,undid_move.to_col, undid_move.from_row,undid_move.from_col);
+                  redo_moves_stack.push(undid_move);
+                }
+              }
+          });
+        
+        $("#btnRedo").click(function(evt) {
+            console.log("redo!");
+            console.log("redo moves stack: " + redo_moves_stack.toString());
+              redo_move = redo_moves_stack.pop();
+            console.log("redo_move " + redo_move);
+              if (redo_move == undefined) {
+                var x = 5;
+                //document.getElementById("btnUndo").disabled = true;
+              }
+              else{
+                
+                console.log("redo_move row: " + redo_move.to_row + " redo_move to col: " + redo_move.to_col);
+
+                var checker = board.getCheckerAt(redo_move.from_row, redo_move.from_col);
+                
+                if (checker == undefined){
+                  console.log("Checker was undefined, what's with that?");
+                }
+                else {
+                  board.moveTo(checker, redo_move.to_row, redo_move.to_col);
+                  drawCheckerGrid();
+                  console.log(checker);
+                  drawArrow(redo_move.from_row,redo_move.from_col, redo_move.to_row,redo_move.to_col);
+                }
+              }
+          });
+
+
+        board.prepareNewGame();
+    
     });
+
+
+
+  
+
 
  //Source: http://www.webtutorialplus.com/html5-canvas-shapes/
  function drawBoardBackground() {
@@ -307,13 +365,15 @@ function movetoSquare(row, col, orig_row, orig_col){
     row = orig_row; 
     col = orig_col;
   }
-  else{
+  else {
     drawArrow(orig_row,orig_col,row,col);
     toggleTurn();
     moves_stack.push(ramifications);
+    console.log(moves_stack.toString());
   }
   //console.log("checker row: " + checker.row);
   board.moveTo(checker, row, col);
+  redo_moves_stack = [];
   drawCheckerGrid();
 }
 
@@ -329,7 +389,6 @@ function addCheckerImg(cell, row, column){
     if (empty == false) {
         var checker = board.getCheckerAt(row,column);
         var imgpath;
-        console.log(checker.isKing);
         if (checker.color == "red") {
             if (checker.isKing){
                 imgpath = 'graphics/red-king.png';
