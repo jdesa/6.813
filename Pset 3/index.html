@@ -81,6 +81,20 @@
         $('#whoseTurn').text(whoseTurn);
         document.getElementById('turninfo').className = "red";
       }
+      refreshUndoRedo();
+    }
+
+    function refreshUndoRedo(){
+
+      undo_disabled = moves_stack.length == 0 ? true : false;
+      console.log(redo_moves_stack);
+      redo_disabled = redo_moves_stack.length == 0 ? true : false;
+      
+      console.log("undo_disabled? " + undo_disabled);
+      console.log("redo_disabled? " + redo_disabled);
+      
+      document.getElementById("btnUndo").disabled = undo_disabled;
+      document.getElementById("btnRedo").disabled = redo_disabled;
     }
 
      //Reference: http://www.html5canvastutorials.com/tutorials/html5-canvas-lines/
@@ -141,6 +155,8 @@
             context.clearRect ( 0 , 0 , arrowcanvas.width, arrowcanvas.height );
             whoseTurn = "red";
             toggleTurn();
+            document.getElementById("btnUndo").disabled = true;
+            document.getElementById("btnRedo").disabled = true;
         });
 
         $("#btnAutoMove").click(
@@ -159,52 +175,73 @@
 
         $("#btnUndo").click(function(evt) {
               undid_move = moves_stack.pop();
-              console.log(undid_move);
-              if (undid_move == undefined) {
-                var x = 5;
-                //document.getElementById("btnUndo").disabled = true;
-              }
-              else{
-                console.log("Undid_move: " + undid_move);
-                var checker = board.getCheckerAt(undid_move.to_row, undid_move.to_col);
-                if (checker == undefined){
-                  console.log("Checker was undefined, what's with that?");
+              //console.log(undid_move);
+              if (undid_move != undefined){
+                //console.log("Undid_move: " + undid_move);
+                
+                for (var i=0; i<undid_move['remove'].length; i++) {
+                    console.log(undid_move['remove'][i]['color']);
+                    console.log(undid_move['remove'][i]['isKing']);
+                    var temp_checker = new Checker(undid_move['remove'][i]['color'], undid_move['remove'][i]['isKing']);
+                    console.log(checker);
+                    console.log(undid_move['remove'][i]['row']);
+                    console.log(undid_move['remove'][i]['col']);
+                    board.add(temp_checker,undid_move['remove'][i]['row'],undid_move['remove'][i]['col']);
                 }
+
+                var checker = board.getCheckerAt(undid_move.to_row, undid_move.to_col);
+                
+                if (checker == undefined){
+                  //console.log(undid_move.to_row);
+                  //console.log(undid_move.for_row);
+                  //console.log("Checker was undefined, what's with that?");
+                }
+                
                 else {
                   board.moveTo(checker, undid_move.from_row, undid_move.from_col);
+                  
+                  if (undid_move['made_king']) {
+                    checker.isKing = false;
+                  }
                   drawCheckerGrid();
-                  console.log(checker);
-
+                  //console.log(checker);
                   drawArrow(undid_move.to_row,undid_move.to_col, undid_move.from_row,undid_move.from_col);
                   redo_moves_stack.push(undid_move);
+                  console.log("pushed to redo moves stack");
+                  console.log(redo_moves_stack);
+                  toggleTurn();
                 }
               }
           });
         
         $("#btnRedo").click(function(evt) {
-            console.log("redo!");
-            console.log("redo moves stack: " + redo_moves_stack.toString());
+            //console.log("redo!");
+            //console.log("redo moves stack: " + redo_moves_stack.toString());
+            if (redo_moves_stack.length > 0){
               redo_move = redo_moves_stack.pop();
-            console.log("redo_move " + redo_move);
+              console.log("redo_moves_stack: " + redo_moves_stack.toString());
+            //console.log("redo_move " + redo_move);
               if (redo_move == undefined) {
                 var x = 5;
                 //document.getElementById("btnUndo").disabled = true;
               }
               else{
                 
-                console.log("redo_move row: " + redo_move.to_row + " redo_move to col: " + redo_move.to_col);
+                //console.log("redo_move row: " + redo_move.to_row + " redo_move to col: " + redo_move.to_col);
 
                 var checker = board.getCheckerAt(redo_move.from_row, redo_move.from_col);
                 
                 if (checker == undefined){
-                  console.log("Checker was undefined, what's with that?");
+                  //console.log("Checker was undefined in redo method, what's with that?");
                 }
                 else {
                   board.moveTo(checker, redo_move.to_row, redo_move.to_col);
                   drawCheckerGrid();
-                  console.log(checker);
+                  //console.log(checker);
                   drawArrow(redo_move.from_row,redo_move.from_col, redo_move.to_row,redo_move.to_col);
+                  toggleTurn();
                 }
+              }
               }
           });
 
@@ -346,20 +383,20 @@ function getDirFromColor(color){
     return 1;
   }
   else {
-    console.log("Invalid Checkercolor.");
+    //console.log("Invalid Checkercolor.");
     return 0;
   }
 }
 
 function movetoSquare(row, col, orig_row, orig_col){    
   var checker = board.getCheckerAt(orig_row,orig_col);
-  //console.log("checker: " + checker);
+  ////console.log("checker: " + checker);
   var isEmptyLocation = board.isEmptyLocation(row, col);
-  //console.log("isEmptyLocation: " + isEmptyLocation);
+  ////console.log("isEmptyLocation: " + isEmptyLocation);
   
   var ramifications = rules.makeMove(checker, getDirFromColor(whoseTurn), getDirFromColor(checker.color), row, col);
 
-  //console.log("Valid move? " + ramifications);
+  ////console.log("Valid move? " + ramifications);
 
   if (isEmptyLocation == false || ramifications == null){
     row = orig_row; 
@@ -369,16 +406,16 @@ function movetoSquare(row, col, orig_row, orig_col){
     drawArrow(orig_row,orig_col,row,col);
     toggleTurn();
     moves_stack.push(ramifications);
-    console.log(moves_stack.toString());
+    //console.log(moves_stack.toString());
   }
-  //console.log("checker row: " + checker.row);
+  ////console.log("checker row: " + checker.row);
   board.moveTo(checker, row, col);
   redo_moves_stack = [];
   drawCheckerGrid();
 }
 
 function calcSquareFromPos(pos){
-  var scalingfactor = 400/BOARD_SIZE; 
+  var scalingfactor = 400/BOARD_SIZE;  
   var square = Math.floor((pos + scalingfactor/2)/scalingfactor);
   return square;
 }
@@ -433,8 +470,8 @@ function addCheckerImg(cell, row, column){
                </td></tr>
               <tr><td><input id="btnNewGame" type="button" name="new" value="New Game"/></td></tr>
               <tr><td><input id="btnAutoMove" type="button" name="new" value="Auto Move"/></td></tr>
-              <tr><td><input id="btnUndo" type="button" name="new" value="Undo"/></td></tr>
-              <tr><td><input id="btnRedo" type="button" name="new" value="Redo"/></td></tr>
+              <tr><td><input id="btnUndo" type="button" name="new" value="Undo" disabled/></td></tr>
+              <tr><td><input id="btnRedo" type="button" name="new" value="Redo" disabled/></td></tr>
             </table>
         </td>
 

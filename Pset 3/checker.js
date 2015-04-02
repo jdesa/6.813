@@ -12,6 +12,7 @@ var Checker = function(color, isKing) {
     //
 	if (color != "red" && color != "black") {
 		alert('color must be one of "red" or "black"');
+		console.log("color is: " + color);
 	}
 
 	this.color = color;			
